@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  backend:
+    image: registry.digitalocean.com/pixlo/familychore-backend:latest
+    container_name: familychore-backend
+    ports:
+      - "3009:3009"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_PORT=${DB_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - SERVER_PORT=${SERVER_PORT}
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - app-network
+
+  frontend:
+    image: registry.digitalocean.com/pixlo/familychore-frontend:latest
+    container_name: familychore-frontend
+    ports:
+      - "5555:5555"
+    environment:
+      - VITE_API_BASE_URL=${API_BASE_URL}
+      - PORT=5555
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

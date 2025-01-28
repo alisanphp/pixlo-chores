@@ -1,0 +1,13 @@
+mkdir family-chores
+cd family-chores
+mkdir frontend backend 
+cd frontend
+npm create vite@latest . -- --template react
+npm install
+npm install @reduxjs/toolkit react-redux axios tailwindcss @headlessui/react @heroicons/react date-fns react-router-dom
+npm install -D tailwindcss postcss autoprefixer @tailwindcss/forms
+npx tailwindcss init -p 
+npm run dev 
+cd backend
+npm install
+npm run dev 
