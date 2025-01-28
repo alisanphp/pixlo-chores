@@ -24,7 +24,7 @@ services:
     ports:
       - "5555:5555"
     environment:
-      - VITE_API_BASE_URL=${API_BASE_URL}
+      - VITE_API_URL=${API_BASE_URL}
       - PORT=5555
     networks:
       - app-network

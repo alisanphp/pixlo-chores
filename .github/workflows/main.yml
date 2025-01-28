@@ -26,7 +26,7 @@ jobs:
 
     - name: Create .env for Frontend
       run: |
-        echo "VITE_API_BASE_URL=${{ vars.API_BASE_URL }}" >> frontend/.env
+        echo "VITE_API_URL=${{ vars.API_BASE_URL }}" >> frontend/.env
         echo "PORT=${{ vars.FRONTEND_PORT }}" >> frontend/.env
 
     - name: Set up Docker Buildx
@@ -86,7 +86,7 @@ jobs:
             ports:
               - "5555:5555"
             environment:
-              - VITE_API_BASE_URL=${{ vars.API_BASE_URL }}
+              - VITE_API_URL=${{ vars.API_BASE_URL }}
               - PORT=5555
             networks:
               - app-network
