@@ -1,0 +1,66 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Create .env for Backend
+      run: |
+        echo "DB_HOST=${{ vars.DB_HOST }}" >> backend/.env
+        echo "DB_USER=${{ vars.DB_USER }}" >> backend/.env
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> backend/.env
+        echo "DB_DATABASE=${{ vars.DB_DATABASE }}" >> backend/.env
+        echo "DB_PORT=${{ vars.DB_PORT }}" >> backend/.env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> backend/.env
+        echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> backend/.env
+
+    - name: Create .env for Frontend
+      run: |
+        echo "VITE_API_BASE_URL=${{ vars.API_BASE_URL }}" >> frontend/.env
+        echo "PORT=${{ vars.FRONTEND_PORT }}" >> frontend/.env
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to DigitalOcean Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: registry.digitalocean.com
+        username: ${{ secrets.DOCR_USERNAME }}
+        password: ${{ secrets.DOCR_ACCESS_TOKEN }}
+
+    - name: Build and push backend image
+      working-directory: ./backend
+      run: |
+        docker build -f ./Dockerfile -t registry.digitalocean.com/pixlo/familychore-backend:latest .
+        docker push registry.digitalocean.com/pixlo/familychore-backend:latest
+
+    - name: Build and push frontend image
+      working-directory: ./frontend
+      run: |
+        docker build -f ./Dockerfile -t registry.digitalocean.com/pixlo/familychore-frontend:latest .
+        docker push registry.digitalocean.com/pixlo/familychore-frontend:latest
+
+    - name: Copy docker-compose file to server
+      run: |
+        sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no docker-compose.yaml root@${{ vars.SERVER_IP }}:${{ vars.DOCKER_COMPOSE_PATH }}
+
+    - name: Deploy to server
+      run: |
+        sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no root@${{ vars.SERVER_IP }} << 'EOF'
+        cd ${{ vars.DOCKER_COMPOSE_PATH }}
+        docker login registry.digitalocean.com -u ${{ secrets.DOCR_USERNAME }} -p ${{ secrets.DOCR_ACCESS_TOKEN }}
+        docker-compose pull
+        docker-compose down
+        docker-compose up -d
+        EOF
