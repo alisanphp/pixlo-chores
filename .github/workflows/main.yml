@@ -19,10 +19,10 @@ jobs:
         echo "DB_HOST=${{ vars.DB_HOST }}" >> backend/.env
         echo "DB_USER=${{ vars.DB_USER }}" >> backend/.env
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> backend/.env
-        echo "DB_DATABASE=${{ vars.DB_DATABASE }}" >> backend/.env
+        echo "DB_NAME=${{ vars.DB_NAME }}" >> backend/.env
         echo "DB_PORT=${{ vars.DB_PORT }}" >> backend/.env
         echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> backend/.env
-        echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> backend/.env
+        echo "SERVER_PORT=${{ vars.SERVER_PORT }}" >> backend/.env
 
     - name: Create .env for Frontend
       run: |
