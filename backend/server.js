@@ -43,7 +43,7 @@ app.use('/api/chores', require('./routes/chores'));
 app.use('/api/rewards', require('./routes/rewards'));
 app.use('/api/penalties', require('./routes/penalties'));
 
-const PORT = process.env.PORT || 3009;
+const PORT = process.env.SERVER_PORT || 3009;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
