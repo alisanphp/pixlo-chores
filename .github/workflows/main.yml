@@ -55,6 +55,47 @@ jobs:
       run: |
         sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no docker-compose.yaml root@${{ vars.SERVER_IP }}:${{ vars.DOCKER_COMPOSE_PATH }}
 
+    - name: Update docker-compose file on server
+      run: |
+        sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no root@${{ vars.SERVER_IP }} << EOF
+        cd ${{ vars.DOCKER_COMPOSE_PATH }}
+        cat > docker-compose.yaml <<EOL
+        version: '3.8'
+        services:
+          familychoresbackend:
+            image: registry.digitalocean.com/pixlo/familychore-backend:latest
+            container_name: familychore-backend
+            ports:
+              - "3009:3009"
+            environment:
+              - DB_HOST=${vars.DB_HOST}
+              - DB_USER=${vars.DB_USER}
+              - DB_PASSWORD=${secrets.DB_PASSWORD}
+              - DB_NAME=${vars.DB_NAME}
+              - DB_PORT=${vars.DB_PORT}
+              - JWT_SECRET=${secrets.JWT_SECRET}
+              - SERVER_PORT=${vars.SERVER_PORT}
+            volumes:
+              - ./backend/uploads:/app/uploads
+            networks:
+              - app-network
+
+          familychoresfrontend:
+            image: registry.digitalocean.com/pixlo/familychore-frontend:latest
+            container_name: familychore-frontend
+            ports:
+              - "5555:5555"
+            environment:
+              - VITE_API_BASE_URL=${vars.API_BASE_URL}
+              - PORT=5555
+            networks:
+              - app-network
+
+        networks:
+          app-network:
+            driver: bridge
+        EOL
+
     - name: Deploy to server
       run: |
         sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no root@${{ vars.SERVER_IP }} << 'EOF'
