@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  familychores_backend:
+  familychoresbackend:
     image: registry.digitalocean.com/pixlo/familychore-backend:latest
     container_name: familychore-backend
     ports:
@@ -18,7 +18,7 @@ services:
     networks:
       - app-network
 
-  familychores_frontend:
+  familychoresfrontend:
     image: registry.digitalocean.com/pixlo/familychore-frontend:latest
     container_name: familychore-frontend
     ports:
